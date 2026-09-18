@@ -2,7 +2,16 @@ import { create } from "zustand";
 import type { SessionUser } from "@/lib/schemas/auth";
 
 interface SessionState {
-  session: SessionUser | null;
+  /**
+   * `undefined` = not yet resolved on this page load (the initial
+   * state — every fresh JS context starts here, including after a full
+   * document reload, since this store isn't persisted). `null` =
+   * confirmed logged out. Consumers (`SiteHeader`, `BookNowButton`) must
+   * treat `undefined` as its own case, not fold it into "logged out" —
+   * that's exactly the distinction that avoids a misleading flash of
+   * logged-out UI while `SessionHydrator` resolves the real state.
+   */
+  session: SessionUser | null | undefined;
   setSession: (session: SessionUser | null) => void;
   clearSession: () => void;
 }
@@ -15,7 +24,7 @@ interface SessionState {
  * directly by the login form and logout action.
  */
 export const useSessionStore = create<SessionState>((set) => ({
-  session: null,
+  session: undefined,
   setSession: (session) => set({ session }),
   clearSession: () => set({ session: null }),
 }));

@@ -16,7 +16,7 @@ Booking API (separate repo, Express backend).
 
 This project uses a deliberately varied set of Next.js App Router
 capabilities — different rendering strategies per route (SSG/ISR/SSR),
-route groups, parallel routes, intercepting routes, middleware, and
+route groups, parallel routes, intercepting routes, a proxy, and
 Route Handlers — each chosen because it fits the specific requirement of
 that part of the app (see the rendering strategy table and feature list
 below). When implementing a new route, follow the same reasoning: pick
@@ -80,8 +80,8 @@ patterns already established in this project.
   (`app/api/auth/login/route.ts`), not accessible from client JS
 - Zustand holds only non-sensitive client state derived from the session
   (e.g. `{ id, name, role }`), not the raw token
-- `middleware.ts` reads the cookie to gate access to `(dashboard)` routes
-  and checks role for `/admin`
+- `proxy.ts` (renamed from `middleware.ts` in Next.js 16) reads the cookie
+  to gate access to `(dashboard)` routes and checks role for `/admin`
 - When redirected to `/login` from a protected action (e.g. "Book now"
   while logged out), the target URL is passed via `?redirect=`
   and the login flow sends the user back there on success

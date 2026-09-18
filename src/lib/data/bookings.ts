@@ -1,0 +1,46 @@
+import { redirect } from "next/navigation";
+import { authFetch } from "@/lib/utils/auth-fetch";
+import { getApiUrl } from "@/lib/utils/get-api-url";
+import {
+  availabilityResponseSchema,
+  type AvailabilityResponse,
+} from "@/lib/schemas/booking";
+
+/**
+ * SSR, always fresh (`no-store`) per AGENTS.md's rendering strategy
+ * table: availability is business-sensitive and changes constantly.
+ * Requires auth, so this goes through `authFetch` rather than plain
+ * `fetch`.
+ */
+export async function getRoomAvailability(
+  roomId: string,
+  date: string
+): Promise<AvailabilityResponse | null> {
+  const res = await authFetch(
+    `${getApiUrl()}/rooms/${roomId}/availability?date=${date}`,
+    { cache: "no-store" }
+  );
+
+  if (res.status === 404) {
+    return null;
+  }
+
+  if (res.status === 401) {
+    // `proxy.ts` only checks the session cookie's presence, not its
+    // expiry — a request with a stale-but-present cookie reaches here
+    // and gets a real 401 from the backend. Send the user back through
+    // the same `?redirect=` flow `proxy.ts` uses for a missing cookie,
+    // rather than letting this surface as a generic thrown error.
+    redirect(
+      `/login?redirect=${encodeURIComponent(`/bookings/new?room=${roomId}`)}`
+    );
+  }
+
+  if (!res.ok) {
+    throw new Error(
+      `Failed to fetch availability for room ${roomId}: ${res.status} ${res.statusText}`
+    );
+  }
+
+  return availabilityResponseSchema.parse(await res.json());
+}
