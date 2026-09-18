@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getRoomById } from "@/lib/api/rooms";
+import { getRoomById } from "@/lib/data/rooms";
 import { RoomDetail } from "./room-detail";
 
 // ISR: room name/capacity/price rarely change (see AGENTS.md rendering

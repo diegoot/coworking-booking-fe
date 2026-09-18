@@ -1,21 +1,14 @@
-import Link from "next/link";
-import type { Room } from "@/lib/api/rooms";
+import type { Room } from "@/lib/data/rooms";
+import { BookNowButton } from "./book-now-button";
 
 /**
  * Presentational room detail, shared between the full page
  * (`(public)/rooms/[id]/page.tsx`) and the intercepted modal
  * (`(public)/@modal/(.)rooms/[id]/page.tsx`) so both render identical
- * content.
+ * content. Stays a Server Component: only the "Book now" button, which
+ * needs session state, is a client subcomponent.
  */
 export function RoomDetail({ room }: { room: Room }) {
-  const bookNowHref = `/bookings/new?room=${room.id}`;
-  // TODO: there's no session/auth state yet (Zustand store lands with the
-  // auth feature). Until then, always send the user through the
-  // "not authenticated" branch of the "Book now" flow described in
-  // AGENTS.md. Once auth exists, check the session here (or in a client
-  // wrapper) and link straight to `bookNowHref` when logged in.
-  const loginRedirectHref = `/login?redirect=${encodeURIComponent(bookNowHref)}`;
-
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
@@ -35,12 +28,7 @@ export function RoomDetail({ room }: { room: Room }) {
           </dd>
         </div>
       </dl>
-      <Link
-        href={loginRedirectHref}
-        className="inline-flex w-fit items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-      >
-        Book now
-      </Link>
+      <BookNowButton roomId={room.id} />
     </div>
   );
 }

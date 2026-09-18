@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getApiUrl } from "@/lib/utils/get-api-url";
 
 const roomSchema = z.object({
   id: z.string(),
@@ -10,16 +11,6 @@ const roomSchema = z.object({
 const roomListSchema = z.array(roomSchema);
 
 export type Room = z.infer<typeof roomSchema>;
-
-function getApiUrl(): string {
-  const url = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
-  if (!url) {
-    throw new Error(
-      "Missing API_URL/NEXT_PUBLIC_API_URL environment variable"
-    );
-  }
-  return url;
-}
 
 /**
  * ISR: revalidated every hour (see AGENTS.md rendering strategy table).

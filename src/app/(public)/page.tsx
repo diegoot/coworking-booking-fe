@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getRooms } from "@/lib/api/rooms";
+import { getRooms } from "@/lib/data/rooms";
 
 // ISR: room list changes rarely (see AGENTS.md rendering strategy table).
 export const revalidate = 3600;

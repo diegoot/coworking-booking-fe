@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getRoomById } from "@/lib/api/rooms";
+import { getRoomById } from "@/lib/data/rooms";
 import { RoomDetail } from "@/app/(public)/rooms/[id]/room-detail";
 import { ModalShell } from "./modal-shell";
 

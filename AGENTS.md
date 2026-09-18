@@ -88,11 +88,21 @@ patterns already established in this project.
 
 ## Mutations
 
-- **Server Actions**: booking creation, booking cancellation, room
-  creation (admin) — each revalidates the relevant path/tag after
-  mutating, so cached/ISR data stays fresh
-- **Route Handler** (not a Server Action): only login, since it needs to
-  set the JWT as an `httpOnly` cookie from a response, not just mutate data
+- **Server Actions**: registration, booking creation, booking
+  cancellation, room creation (admin), logout — each mutates this app's
+  own domain data (or clears its own session cookies) and revalidates
+  the relevant path/tag so cached/ISR data stays fresh. Registration
+  doesn't touch the session at all (no auto-login), so it's a plain
+  domain mutation like the others.
+- **Route Handler** (not a Server Action): only login
+  (`app/api/auth/login/route.ts`). Login isn't a domain mutation — Next
+  acts as a BFF (backend-for-frontend), proxying credentials to the
+  external backend and translating its raw JWT response into this app's
+  own `httpOnly` session cookie. A Server Action *could* technically set
+  that cookie too (`cookies().set()` works there as well), so the
+  distinction isn't about capability — it's that a Route Handler is the
+  more honest shape for "this is a REST-style auth proxy to another
+  service," not "mutate my own data."
 
 ## Backend endpoints
 
