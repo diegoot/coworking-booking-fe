@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { logout } from "@/lib/actions/logout";
 import { useSessionStore } from "@/lib/store/session";
 
 const navLinkClasses =
   "text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50";
+
+const currentPageClasses = "text-sm font-medium text-zinc-900 dark:text-zinc-50";
 
 /**
  * Session-aware nav shared by every route group. Client Component
@@ -19,6 +21,7 @@ const navLinkClasses =
  */
 export function SiteHeader() {
   const router = useRouter();
+  const pathname = usePathname();
   const session = useSessionStore((state) => state.session);
   const clearSession = useSessionStore((state) => state.clearSession);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -84,16 +87,31 @@ export function SiteHeader() {
         </>
       ) : (
         <>
-          <Link href="/login" className={navLinkClasses} onClick={closeMenu}>
-            Log in
-          </Link>
-          <Link
-            href="/register"
-            onClick={closeMenu}
-            className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-          >
-            Sign up
-          </Link>
+          {pathname === "/login" ? (
+            <span aria-current="page" className={currentPageClasses}>
+              Log in
+            </span>
+          ) : (
+            <Link href="/login" className={navLinkClasses} onClick={closeMenu}>
+              Log in
+            </Link>
+          )}
+          {pathname === "/register" ? (
+            <span
+              aria-current="page"
+              className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-500 dark:border-zinc-700 dark:text-zinc-400"
+            >
+              Sign up
+            </span>
+          ) : (
+            <Link
+              href="/register"
+              onClick={closeMenu}
+              className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+            >
+              Sign up
+            </Link>
+          )}
         </>
       )}
     </>
