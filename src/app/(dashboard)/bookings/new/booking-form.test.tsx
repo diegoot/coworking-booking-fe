@@ -18,11 +18,12 @@ const slots: AvailabilitySlot[] = [
 ];
 
 describe("BookingForm", () => {
-  it("renders only the free slots as selectable options", () => {
+  it("renders every slot in one list, only the free ones as selectable radios", () => {
     render(<BookingForm roomId="room-1" slots={slots} />);
 
-    const radios = screen.getAllByRole("radio");
-    expect(radios).toHaveLength(2);
+    expect(screen.getAllByRole("radio")).toHaveLength(2);
+    // The busy slot still shows up in the list, just not as a radio.
+    expect(screen.getByText("Busy")).toBeInTheDocument();
   });
 
   it("blocks submission when no slot is selected", async () => {

@@ -12,14 +12,18 @@ import { createBookingAction } from "@/lib/actions/create-booking";
 import { formatSlotTime } from "@/lib/utils/format-slot-time";
 
 /**
- * Client Component: lets the user pick one of today's free slots for
- * `roomId` and submits straight to `createBookingAction` (same pattern
- * as `register-form.tsx` — call the Server Action directly from
- * `onSubmit`, it redirects to `/bookings` itself on success and only
- * ever returns `{ error }` here). `roomId` is fixed from the prop and
- * never user-editable; selecting a slot fills `startTime`/`endTime`
- * with that slot's own ISO strings via `setValue` so the Zod resolver
- * validates the exact shape `createBookingAction` expects.
+ * Client Component: shows every one of today's slots for `roomId` in a
+ * single list — free slots are selectable, busy ones are shown grayed
+ * out and disabled instead of hidden, so the user sees the whole day at
+ * a glance without a separate read-only availability list next to the
+ * form (that duplicated the same information twice). Submits straight
+ * to `createBookingAction` (same pattern as `register-form.tsx` — call
+ * the Server Action directly from `onSubmit`, it redirects to
+ * `/bookings` itself on success and only ever returns `{ error }`
+ * here). `roomId` is fixed from the prop and never user-editable;
+ * selecting a slot fills `startTime`/`endTime` with that slot's own ISO
+ * strings via `setValue` so the Zod resolver validates the exact shape
+ * `createBookingAction` expects.
  */
 export function BookingForm({
   roomId,
@@ -29,7 +33,7 @@ export function BookingForm({
   slots: AvailabilitySlot[];
 }) {
   const [serverError, setServerError] = useState<string | null>(null);
-  const freeSlots = slots.filter((slot) => slot.status === "free");
+  const hasFreeSlots = slots.some((slot) => slot.status === "free");
 
   const [selectedStart, setSelectedStart] = useState<string | null>(null);
 
@@ -56,8 +60,6 @@ export function BookingForm({
     }
   }
 
-  const hasFreeSlots = freeSlots.length > 0;
-
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -72,23 +74,27 @@ export function BookingForm({
           Select a time slot
         </legend>
 
-        {hasFreeSlots ? (
-          <div className="flex flex-col gap-2">
-            {freeSlots.map((slot) => {
-              const isSelected = selectedStart === slot.start;
-              return (
-                <label
-                  key={slot.start}
-                  className={`flex cursor-pointer items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors focus-within:ring-2 focus-within:ring-zinc-900 dark:focus-within:ring-zinc-100 ${
-                    isSelected
-                      ? "border-zinc-900 bg-zinc-100 dark:border-zinc-100 dark:bg-zinc-800"
-                      : "border-zinc-300 dark:border-zinc-700"
-                  }`}
-                >
-                  <span className="text-zinc-900 dark:text-zinc-50">
-                    {formatSlotTime(slot.start)} &ndash;{" "}
-                    {formatSlotTime(slot.end)}
-                  </span>
+        <div className="flex flex-col gap-2">
+          {slots.map((slot) => {
+            const isFree = slot.status === "free";
+            const isSelected = isFree && selectedStart === slot.start;
+            return (
+              <label
+                key={slot.start}
+                className={`flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors ${
+                  isFree
+                    ? `cursor-pointer focus-within:ring-2 focus-within:ring-zinc-900 dark:focus-within:ring-zinc-100 ${
+                        isSelected
+                          ? "border-zinc-900 bg-zinc-100 dark:border-zinc-100 dark:bg-zinc-800"
+                          : "border-zinc-300 dark:border-zinc-700"
+                      }`
+                    : "cursor-not-allowed border-zinc-200 opacity-50 dark:border-zinc-800"
+                }`}
+              >
+                <span className="text-zinc-900 dark:text-zinc-50">
+                  {formatSlotTime(slot.start)} &ndash; {formatSlotTime(slot.end)}
+                </span>
+                {isFree ? (
                   <input
                     type="radio"
                     name="slot"
@@ -97,11 +103,17 @@ export function BookingForm({
                     onChange={() => handleSlotSelect(slot)}
                     className="h-4 w-4 accent-zinc-900 dark:accent-zinc-100"
                   />
-                </label>
-              );
-            })}
-          </div>
-        ) : (
+                ) : (
+                  <span className="text-xs font-medium text-zinc-500 dark:text-zinc-500">
+                    Busy
+                  </span>
+                )}
+              </label>
+            );
+          })}
+        </div>
+
+        {!hasFreeSlots && (
           <p className="text-sm text-zinc-600 dark:text-zinc-400">
             No available slots for this room today.
           </p>
