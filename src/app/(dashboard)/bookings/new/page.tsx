@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getRoomById } from "@/lib/data/rooms";
+import { getBusinessToday } from "@/lib/utils/business-date";
 import { Availability } from "./availability";
 import AvailabilityLoading from "./availability-loading";
 
@@ -13,10 +14,6 @@ type NewBookingPageProps = {
 // table. Only the availability fetch itself is isolated behind
 // Suspense below, so the room summary and form shell render
 // immediately without waiting on it.
-function getToday(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
 export default async function NewBookingPage({
   searchParams,
 }: NewBookingPageProps) {
@@ -32,7 +29,7 @@ export default async function NewBookingPage({
     notFound();
   }
 
-  const date = getToday();
+  const date = getBusinessToday();
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-12">
