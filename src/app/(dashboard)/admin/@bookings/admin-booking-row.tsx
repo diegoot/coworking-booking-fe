@@ -1,6 +1,7 @@
 import type { Booking } from "@/lib/schemas/booking";
 import { formatSlotTime } from "@/lib/utils/format-slot-time";
 import { formatBookingDate } from "@/lib/utils/format-booking-date";
+import { isBookingPast } from "@/lib/utils/is-booking-past";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
 import { CancelButton } from "@/components/cancel-button";
 
@@ -36,7 +37,7 @@ export function AdminBookingRow({
           {formatSlotTime(booking.endTime)}
         </p>
       </div>
-      {booking.status !== "CANCELLED" && (
+      {booking.status !== "CANCELLED" && !isBookingPast(booking) && (
         <CancelButton bookingId={booking.id} />
       )}
     </li>

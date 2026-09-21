@@ -9,13 +9,18 @@ vi.mock("@/components/cancel-button", () => ({
   ),
 }));
 
+// Default slot is an hour from now, one hour long, so `isBookingPast`
+// treats it as upcoming by default — tests that care about a past
+// booking pass an explicit past startTime/endTime instead.
 function makeBooking(overrides: Partial<Booking> = {}): Booking {
+  const start = new Date(Date.now() + 60 * 60 * 1000);
+  const end = new Date(start.getTime() + 60 * 60 * 1000);
   return {
     id: "b1",
     userId: "u1",
     roomId: "room-1",
-    startTime: "2026-09-18T09:00:00.000Z",
-    endTime: "2026-09-18T10:00:00.000Z",
+    startTime: start.toISOString(),
+    endTime: end.toISOString(),
     status: "CONFIRMED",
     createdAt: "2026-09-17T09:00:00.000Z",
     ...overrides,
@@ -25,7 +30,14 @@ function makeBooking(overrides: Partial<Booking> = {}): Booking {
 describe("BookingRow", () => {
   it("renders room name, formatted date/time, and the status badge text", () => {
     render(
-      <BookingRow booking={makeBooking({ status: "CONFIRMED" })} roomName="Room A" />
+      <BookingRow
+        booking={makeBooking({
+          status: "CONFIRMED",
+          startTime: "2026-09-18T09:00:00.000Z",
+          endTime: "2026-09-18T10:00:00.000Z",
+        })}
+        roomName="Room A"
+      />
     );
 
     expect(screen.getByText("Room A")).toBeInTheDocument();
@@ -44,7 +56,7 @@ describe("BookingRow", () => {
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
-  it("renders the cancel button for a CONFIRMED booking", () => {
+  it("renders the cancel button for an upcoming CONFIRMED booking", () => {
     render(
       <BookingRow
         booking={makeBooking({ status: "CONFIRMED" })}
@@ -53,5 +65,20 @@ describe("BookingRow", () => {
     );
 
     expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
+  });
+
+  it("does not render the cancel button once the booking's slot has ended", () => {
+    render(
+      <BookingRow
+        booking={makeBooking({
+          status: "CONFIRMED",
+          startTime: "2026-09-18T09:00:00.000Z",
+          endTime: "2026-09-18T10:00:00.000Z",
+        })}
+        roomName="Room A"
+      />
+    );
+
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 });
