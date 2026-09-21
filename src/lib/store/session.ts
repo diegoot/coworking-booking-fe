@@ -1,4 +1,5 @@
-import { create } from "zustand";
+import { create, type StateCreator } from "zustand";
+import { devtools } from "zustand/middleware";
 import type { SessionUser } from "@/lib/schemas/auth";
 
 interface SessionState {
@@ -16,15 +17,26 @@ interface SessionState {
   clearSession: () => void;
 }
 
+const storeCreator: StateCreator<SessionState> = (set) => ({
+  session: undefined,
+  setSession: (session) => set({ session }),
+  clearSession: () => set({ session: null }),
+});
+
 /**
  * Global client session state. Holds only the non-sensitive fields
  * derived from the session (id, name, role) — never the raw JWT, which
  * lives in an httpOnly cookie inaccessible to client JS. Populated on
  * first load from the server (see `SessionHydrator`) and updated
  * directly by the login form and logout action.
+ *
+ * `devtools` is applied only in development: `NODE_ENV` is a static
+ * string at build time, so Next tree-shakes the `devtools`-wrapped
+ * branch (and the `zustand/middleware` import along with it) out of the
+ * production bundle entirely, rather than shipping dead devtools-wiring
+ * code to every visitor.
  */
-export const useSessionStore = create<SessionState>((set) => ({
-  session: undefined,
-  setSession: (session) => set({ session }),
-  clearSession: () => set({ session: null }),
-}));
+export const useSessionStore =
+  process.env.NODE_ENV === "development"
+    ? create<SessionState>()(devtools(storeCreator, { name: "session" }))
+    : create<SessionState>(storeCreator);
