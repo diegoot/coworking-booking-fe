@@ -20,15 +20,10 @@ export interface CreateBookingActionResult {
  * throwing so the caller can render it inline.
  *
  * On success, calls `updateTag("bookings")` — read-your-own-writes
- * invalidation (Server-Action-only, immediate) so feature 5's `/bookings`
- * list sees this booking right away instead of stale cached data. Tags
- * `["rooms"]`-style tagging is only assigned via `fetch`'s `next.tags`
- * option (see `lib/data/rooms.ts`); nothing currently tags `"bookings"`
- * fetches yet since the list page doesn't exist — this call is prep,
- * confirmed with the user, and becomes effective once feature 5 tags its
- * fetch with `"bookings"`. Then redirects to `/bookings`. That route
- * doesn't exist yet, so this redirect currently 404s — also confirmed
- * with the user as expected until feature 5 lands.
+ * invalidation (Server-Action-only, immediate) so `/bookings` (the "My
+ * bookings" list, `lib/data/bookings.ts#getMyBookings`, tagged
+ * `["bookings"]`) sees this booking right away instead of stale cached
+ * data. Then redirects to `/bookings`.
  */
 export async function createBookingAction(
   values: CreateBookingRequest

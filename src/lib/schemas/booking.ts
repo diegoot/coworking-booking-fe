@@ -38,3 +38,34 @@ export const availabilityResponseSchema = z.object({
   slots: z.array(availabilitySlotSchema),
 });
 export type AvailabilityResponse = z.infer<typeof availabilityResponseSchema>;
+
+/**
+ * A booking's lifecycle status, as returned by the backend.
+ */
+export const bookingStatusSchema = z.enum(["PENDING", "CONFIRMED", "CANCELLED"]);
+export type BookingStatus = z.infer<typeof bookingStatusSchema>;
+
+/**
+ * A single booking as returned by `GET /bookings/me` (and
+ * `GET /bookings/:userId`). This is a read schema, unlike
+ * `createBookingRequestSchema` above: `startTime`/`endTime`/`createdAt`
+ * are left as `z.string()` rather than `z.iso.datetime()` to be lenient
+ * about whatever ISO variant the backend actually sends, instead of
+ * strictly validating a shape we don't control on the way in.
+ */
+export const bookingSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  roomId: z.string(),
+  startTime: z.string(),
+  endTime: z.string(),
+  status: bookingStatusSchema,
+  createdAt: z.string(),
+});
+export type Booking = z.infer<typeof bookingSchema>;
+
+/**
+ * Bare array response, matching `roomListSchema`'s pattern in
+ * `src/lib/data/rooms.ts` — `GET /bookings/me` is not wrapped.
+ */
+export const bookingListSchema = z.array(bookingSchema);

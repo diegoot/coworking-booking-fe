@@ -2,9 +2,11 @@ import type { ReactNode } from "react";
 
 /**
  * Minimal pass-through layout for the `(dashboard)` route group.
- * Deliberately no nav/chrome yet — that's deferred to feature 5, once
- * `/bookings` (the "My bookings" list) exists and a real dashboard shell
- * makes sense to build around it.
+ * `SiteHeader` (rendered above every route group) already provides
+ * "My bookings"/"Admin" nav links, and no route in this group currently
+ * needs shared chrome beyond that (no sidebar, breadcrumbs, etc.
+ * described in AGENTS.md) — revisit once `/admin` (feature 6) actually
+ * needs shared structure, not before.
  */
 export default function DashboardLayout({
   children,

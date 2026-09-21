@@ -13,7 +13,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { redirect } from "next/navigation";
-import { getRoomAvailability } from "./bookings";
+import { getRoomAvailability, getMyBookings } from "./bookings";
 
 describe("getRoomAvailability", () => {
   const originalFetch = global.fetch;
@@ -127,5 +127,75 @@ describe("getRoomAvailability", () => {
     ) as unknown as typeof fetch;
 
     await expect(getRoomAvailability("1", "2026-09-18")).rejects.toThrow();
+  });
+});
+
+describe("getMyBookings", () => {
+  const originalFetch = global.fetch;
+
+  const booking = {
+    id: "b1",
+    userId: "u1",
+    roomId: "1",
+    startTime: "2026-09-18T09:00:00.000Z",
+    endTime: "2026-09-18T10:00:00.000Z",
+    status: "CONFIRMED",
+    createdAt: "2026-09-17T09:00:00.000Z",
+  };
+
+  beforeEach(() => {
+    process.env.API_URL = "http://api.test";
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  it("returns the parsed booking array on success", async () => {
+    global.fetch = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([booking]), { status: 200 })
+    ) as unknown as typeof fetch;
+
+    const bookings = await getMyBookings();
+
+    expect(bookings).toEqual([booking]);
+  });
+
+  it("attaches the Authorization header via authFetch and tags the fetch instead of using no-store", async () => {
+    global.fetch = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([]), { status: 200 })
+    ) as unknown as typeof fetch;
+
+    await getMyBookings();
+
+    const [url, init] = vi.mocked(global.fetch).mock.calls[0];
+    expect(url).toBe("http://api.test/bookings/me");
+    const headers = new Headers(init?.headers as HeadersInit);
+    expect(headers.get("Authorization")).toBe("Bearer jwt.token.value");
+    // Deliberate design decision (see this function's doc comment): tag
+    // invalidation, not literal `no-store`, is what keeps this fresh.
+    expect(init?.next).toEqual({ tags: ["bookings"] });
+    expect(init?.cache).toBeUndefined();
+  });
+
+  it("redirects to login with a redirect-back target on a 401", async () => {
+    global.fetch = vi.fn().mockResolvedValue(
+      new Response(null, { status: 401 })
+    ) as unknown as typeof fetch;
+
+    await expect(getMyBookings()).rejects.toThrow("NEXT_REDIRECT");
+
+    expect(redirect).toHaveBeenCalledWith("/login?redirect=%2Fbookings");
+  });
+
+  it("throws when the backend responds with a non-401, non-OK status", async () => {
+    global.fetch = vi.fn().mockResolvedValue(
+      new Response("Internal Server Error", {
+        status: 500,
+        statusText: "Internal Server Error",
+      })
+    ) as unknown as typeof fetch;
+
+    await expect(getMyBookings()).rejects.toThrow(/Failed to fetch bookings/);
   });
 });

@@ -3,7 +3,9 @@ import { authFetch } from "@/lib/utils/auth-fetch";
 import { getApiUrl } from "@/lib/utils/get-api-url";
 import {
   availabilityResponseSchema,
+  bookingListSchema,
   type AvailabilityResponse,
+  type Booking,
 } from "@/lib/schemas/booking";
 
 /**
@@ -43,4 +45,34 @@ export async function getRoomAvailability(
   }
 
   return availabilityResponseSchema.parse(await res.json());
+}
+
+/**
+ * SSR per AGENTS.md's rendering strategy table ("`/bookings` | SSR |
+ * User-specific, must be fresh"), but satisfied via tag invalidation
+ * rather than literal `no-store`: this fetch is tagged `"bookings"`
+ * (not `cache: "no-store"`, which would silently drop `next.tags` since
+ * the two options conflict) so `createBookingAction` and
+ * `cancelBookingAction`'s existing/new `updateTag("bookings")` calls
+ * have something to invalidate — read-your-own-writes freshness instead
+ * of no-store freshness.
+ */
+export async function getMyBookings(): Promise<Booking[]> {
+  const res = await authFetch(`${getApiUrl()}/bookings/me`, {
+    next: { tags: ["bookings"] },
+  });
+
+  if (res.status === 401) {
+    // Same justification as `getRoomAvailability` above: `proxy.ts`
+    // only checks the session cookie's presence, not its expiry.
+    redirect(`/login?redirect=${encodeURIComponent("/bookings")}`);
+  }
+
+  if (!res.ok) {
+    throw new Error(
+      `Failed to fetch bookings: ${res.status} ${res.statusText}`
+    );
+  }
+
+  return bookingListSchema.parse(await res.json());
 }
