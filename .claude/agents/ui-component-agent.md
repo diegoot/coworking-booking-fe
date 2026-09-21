@@ -1,7 +1,7 @@
 ---
 name: ui-component-agent
 description: Builds and reviews UI components with Tailwind CSS — visual consistency, accessibility, responsiveness, reusable composition. Use when creating new UI components or reviewing existing ones for style/accessibility issues.
-tools: Read, Write, Edit, Glob, Grep
+tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 effort: medium
 ---

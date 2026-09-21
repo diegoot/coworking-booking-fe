@@ -1,7 +1,7 @@
 ---
 name: data-fetching-agent
 description: Handles Server Components and Next.js extended fetch — rendering strategy (SSG/ISR/SSR) per route, caching/revalidation, loading/error states, Route Handlers, Server Actions, connection to the backend API. Use when fetching data, choosing a rendering strategy, or implementing Route Handlers or Server Actions.
-tools: Read, Write, Edit, Glob, Grep
+tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 effort: medium
 ---

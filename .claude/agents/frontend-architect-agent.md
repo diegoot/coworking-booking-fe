@@ -1,7 +1,7 @@
 ---
 name: frontend-architect-agent
 description: Designs and reviews the Next.js App Router architecture — folder structure, route groups, parallel/intercepting routes, Server vs Client Components, middleware, and where state lives (local, server, or Zustand). Use when creating new routes/pages, deciding component placement, implementing routing patterns, or adding client-side state.
-tools: Read, Write, Edit, Glob, Grep
+tools: Read, Write, Edit, Bash, Glob, Grep
 model: sonnet
 effort: medium
 ---
