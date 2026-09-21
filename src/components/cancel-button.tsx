@@ -5,12 +5,18 @@ import { useRouter } from "next/navigation";
 import { cancelBookingAction } from "@/lib/actions/cancel-booking";
 
 /**
+ * Shared between `(dashboard)/bookings` ("my bookings") and
+ * `(dashboard)/admin/@bookings` (admin lookup) — same reasoning as
+ * `BookingStatusBadge`/`formatBookingDate`: two features render a
+ * booking row and both need cancel, so it lives in `components/` rather
+ * than being duplicated or reached into from a sibling feature folder.
+ *
  * Client Component: calls `cancelBookingAction` directly from `onClick`
  * (same direct-call pattern `booking-form.tsx` uses for
  * `createBookingAction`, rather than a `<form action>`). `router.refresh()`
- * is required because `/bookings` is a Server Component page: the Server
- * Action's `updateTag("bookings")` invalidates the tag, but doesn't
- * re-render the already-mounted client tree by itself —
+ * is required because both call sites are Server Component pages: the
+ * Server Action's `updateTag(...)` calls invalidate the relevant tag, but
+ * don't re-render the already-mounted client tree by themselves —
  * `router.refresh()` re-runs the Server Component tree for the current
  * route so the now-invalidated tag is refetched.
  *

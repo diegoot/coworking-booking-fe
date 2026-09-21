@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { BookingRow } from "./booking-row";
 import type { Booking } from "@/lib/schemas/booking";
 
-vi.mock("./cancel-button", () => ({
+vi.mock("@/components/cancel-button", () => ({
   CancelButton: ({ bookingId }: { bookingId: string }) => (
     <button type="button">Cancel {bookingId}</button>
   ),

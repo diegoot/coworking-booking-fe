@@ -19,6 +19,12 @@ export interface CancelBookingActionResult {
  * The backend's cancel is intentionally not idempotent: cancelling an
  * already-cancelled booking is a 409, surfaced here as-is rather than
  * worked around client-side.
+ *
+ * Invalidates both `"bookings"` (own list, `getMyBookings`) and
+ * `"admin-bookings"` (admin lookup, `getBookingsForUser`): `CancelButton`
+ * is shared between both features and this action has no way to know
+ * which one called it, so it invalidates both rather than taking a
+ * "which list is this" parameter it doesn't otherwise need.
  */
 export async function cancelBookingAction(
   bookingId: string
@@ -45,4 +51,5 @@ export async function cancelBookingAction(
   }
 
   updateTag("bookings");
+  updateTag("admin-bookings");
 }

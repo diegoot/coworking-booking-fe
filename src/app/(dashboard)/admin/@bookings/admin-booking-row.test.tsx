@@ -1,7 +1,15 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { AdminBookingRow } from "./admin-booking-row";
 import type { Booking, BookingStatus } from "@/lib/schemas/booking";
+
+vi.mock("@/lib/actions/cancel-booking", () => ({
+  cancelBookingAction: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: vi.fn() }),
+}));
 
 function makeBooking(overrides: Partial<Booking> = {}): Booking {
   return {
@@ -30,8 +38,8 @@ describe("AdminBookingRow", () => {
     expect(screen.getByText(/Sep 18, 2026/)).toBeInTheDocument();
   });
 
-  it.each<BookingStatus>(["CONFIRMED", "PENDING", "CANCELLED"])(
-    "does not render a Cancel button or any button at all for status %s",
+  it.each<BookingStatus>(["CONFIRMED", "PENDING"])(
+    "renders a Cancel button for status %s — an admin can cancel any user's booking",
     (status) => {
       render(
         <AdminBookingRow
@@ -40,13 +48,20 @@ describe("AdminBookingRow", () => {
         />
       );
 
-      expect(screen.queryByRole("button")).not.toBeInTheDocument();
-      // Note: `/cancel/i` would false-positive-match the CANCELLED status
-      // badge text itself, so assert there's no *button* labelled Cancel
-      // specifically instead.
       expect(
-        screen.queryByRole("button", { name: /cancel/i })
-      ).not.toBeInTheDocument();
+        screen.getByRole("button", { name: "Cancel" })
+      ).toBeInTheDocument();
     }
   );
+
+  it("does not render a Cancel button for a CANCELLED booking", () => {
+    render(
+      <AdminBookingRow
+        booking={makeBooking({ status: "CANCELLED" })}
+        roomName="Room A"
+      />
+    );
+
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
 });

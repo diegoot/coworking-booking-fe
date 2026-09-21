@@ -34,6 +34,7 @@ describe("cancelBookingAction", () => {
 
     expect(result).toBeUndefined();
     expect(updateTag).toHaveBeenCalledWith("bookings");
+    expect(updateTag).toHaveBeenCalledWith("admin-bookings");
     const [url, init] = vi.mocked(global.fetch).mock.calls[0];
     expect(url).toBe("http://api.test/bookings/b1");
     expect(init?.method).toBe("DELETE");

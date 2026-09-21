@@ -2,7 +2,7 @@ import type { Booking } from "@/lib/schemas/booking";
 import { formatSlotTime } from "@/lib/utils/format-slot-time";
 import { formatBookingDate } from "@/lib/utils/format-booking-date";
 import { BookingStatusBadge } from "@/components/booking-status-badge";
-import { CancelButton } from "./cancel-button";
+import { CancelButton } from "@/components/cancel-button";
 
 /**
  * Server Component: no client state needed here, the whole `(dashboard)`
