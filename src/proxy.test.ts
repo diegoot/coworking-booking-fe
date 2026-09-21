@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { NextRequest } from "next/server";
 import proxy, { config } from "./proxy";
-import { SESSION_TOKEN_COOKIE } from "@/lib/constants/cookies";
+import {
+  SESSION_TOKEN_COOKIE,
+  SESSION_USER_COOKIE,
+} from "@/lib/constants/cookies";
 
 function request(url: string, cookie?: string) {
   const headers = new Headers();
@@ -42,5 +45,83 @@ describe("proxy", () => {
     // "public routes like `/` and `/how-it-works` are untouched", rather
     // than re-implementing Next's own path-to-regexp matching here.
     expect(config.matcher).toEqual(["/bookings/:path*", "/admin/:path*"]);
+  });
+
+  it("redirects /admin to / when session_token is present but session_user is absent", () => {
+    const res = proxy(
+      request(
+        "http://localhost/admin",
+        `${SESSION_TOKEN_COOKIE}=jwt.token.value`
+      )
+    );
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe("http://localhost/");
+  });
+
+  it("redirects /admin to / when session_user is unparseable JSON", () => {
+    const res = proxy(
+      request(
+        "http://localhost/admin",
+        `${SESSION_TOKEN_COOKIE}=jwt.token.value; ${SESSION_USER_COOKIE}=not-json`
+      )
+    );
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe("http://localhost/");
+  });
+
+  it("redirects /admin to / when session_user fails schema validation", () => {
+    const res = proxy(
+      request(
+        "http://localhost/admin",
+        `${SESSION_TOKEN_COOKIE}=jwt.token.value; ${SESSION_USER_COOKIE}=${encodeURIComponent(
+          JSON.stringify({ id: "1" })
+        )}`
+      )
+    );
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe("http://localhost/");
+  });
+
+  it("redirects /admin to / when session_user has role USER", () => {
+    const res = proxy(
+      request(
+        "http://localhost/admin",
+        `${SESSION_TOKEN_COOKIE}=jwt.token.value; ${SESSION_USER_COOKIE}=${encodeURIComponent(
+          JSON.stringify({ id: "1", name: "Jane", role: "USER" })
+        )}`
+      )
+    );
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe("http://localhost/");
+  });
+
+  it("passes through /admin when session_user has role ADMIN", () => {
+    const res = proxy(
+      request(
+        "http://localhost/admin",
+        `${SESSION_TOKEN_COOKIE}=jwt.token.value; ${SESSION_USER_COOKIE}=${encodeURIComponent(
+          JSON.stringify({ id: "1", name: "Jane", role: "ADMIN" })
+        )}`
+      )
+    );
+
+    expect(res.headers.get("location")).toBeNull();
+  });
+
+  it("does not apply the /admin role check to other protected routes", () => {
+    const res = proxy(
+      request(
+        "http://localhost/bookings/new?room=1",
+        `${SESSION_TOKEN_COOKIE}=jwt.token.value`
+      )
+    );
+
+    // No session_user cookie at all, yet a non-/admin path still just
+    // passes through on token presence alone, as before.
+    expect(res.headers.get("location")).toBeNull();
   });
 });

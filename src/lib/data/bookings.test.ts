@@ -13,7 +13,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { redirect } from "next/navigation";
-import { getRoomAvailability, getMyBookings } from "./bookings";
+import { getRoomAvailability, getMyBookings, getBookingsForUser } from "./bookings";
 
 describe("getRoomAvailability", () => {
   const originalFetch = global.fetch;
@@ -197,5 +197,93 @@ describe("getMyBookings", () => {
     ) as unknown as typeof fetch;
 
     await expect(getMyBookings()).rejects.toThrow(/Failed to fetch bookings/);
+  });
+});
+
+describe("getBookingsForUser", () => {
+  const originalFetch = global.fetch;
+
+  const booking = {
+    id: "b1",
+    userId: "u2",
+    roomId: "1",
+    startTime: "2026-09-18T09:00:00.000Z",
+    endTime: "2026-09-18T10:00:00.000Z",
+    status: "CONFIRMED",
+    createdAt: "2026-09-17T09:00:00.000Z",
+  };
+
+  beforeEach(() => {
+    process.env.API_URL = "http://api.test";
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  it("returns the parsed booking array on success for a given userId", async () => {
+    global.fetch = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([booking]), { status: 200 })
+    ) as unknown as typeof fetch;
+
+    const bookings = await getBookingsForUser("u2");
+
+    expect(bookings).toEqual([booking]);
+  });
+
+  it("attaches the Authorization header via authFetch and tags the fetch with admin-bookings, not bookings", async () => {
+    global.fetch = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([]), { status: 200 })
+    ) as unknown as typeof fetch;
+
+    await getBookingsForUser("u2");
+
+    const [url, init] = vi.mocked(global.fetch).mock.calls[0];
+    expect(url).toBe("http://api.test/bookings/u2");
+    const headers = new Headers(init?.headers as HeadersInit);
+    expect(headers.get("Authorization")).toBe("Bearer jwt.token.value");
+    expect(init?.next).toEqual({ tags: ["admin-bookings"] });
+    expect(init?.cache).toBeUndefined();
+  });
+
+  it("redirects to /login?redirect=%2Fadmin on a 401", async () => {
+    global.fetch = vi.fn().mockResolvedValue(
+      new Response(null, { status: 401 })
+    ) as unknown as typeof fetch;
+
+    await expect(getBookingsForUser("u2")).rejects.toThrow("NEXT_REDIRECT");
+
+    expect(redirect).toHaveBeenCalledWith("/login?redirect=%2Fadmin");
+  });
+
+  it("throws a permission error on a 403", async () => {
+    global.fetch = vi.fn().mockResolvedValue(
+      new Response(null, { status: 403 })
+    ) as unknown as typeof fetch;
+
+    await expect(getBookingsForUser("u2")).rejects.toThrow(/permission/i);
+  });
+
+  it("returns an empty array when the backend returns 200 with []", async () => {
+    global.fetch = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([]), { status: 200 })
+    ) as unknown as typeof fetch;
+
+    const bookings = await getBookingsForUser("no-such-user");
+
+    expect(bookings).toEqual([]);
+  });
+
+  it("throws on an unexpected non-ok status", async () => {
+    global.fetch = vi.fn().mockResolvedValue(
+      new Response("Internal Server Error", {
+        status: 500,
+        statusText: "Internal Server Error",
+      })
+    ) as unknown as typeof fetch;
+
+    await expect(getBookingsForUser("u2")).rejects.toThrow(
+      /Failed to fetch bookings for user/
+    );
   });
 });

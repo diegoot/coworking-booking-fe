@@ -54,7 +54,11 @@ patterns already established in this project.
                               @bookings simultaneously, each with its own
                               independent loading/error state
     @rooms                   parallel slot: room management (create room)
-    @bookings                parallel slot: all users' bookings
+    @bookings                parallel slot: look up a specific user's
+                              bookings by user ID (the backend has no
+                              endpoint to list all users or all bookings
+                              across users, so this is a manual lookup,
+                              not a full roster)
 ```
 
 ### "Book now" flow
@@ -72,7 +76,8 @@ patterns already established in this project.
 | `/bookings/new` (availability)| SSR (`no-store`), streamed via Suspense — the form shell renders immediately while availability streams in with a skeleton | Protected route; availability is business-sensitive and changes constantly, must be fresh |
 | `/how-it-works`            | SSG | No data dependency, pure static content |
 | `/bookings`                | SSR | User-specific, must be fresh |
-| `/admin` (both slots)      | SSR (`no-store`) | Admin data must be fresh |
+| `/admin` `@bookings`       | SSR (fresh on every request — forced dynamic by reading the session cookie) | Looking up a specific user's bookings must reflect the real current state |
+| `/admin` `@rooms`          | ISR (`revalidate: 3600`, same `rooms` tag as Home/`/rooms/[id]`) | Room data changes rarely, like Home; `createRoomAction`'s `updateTag("rooms")` makes new rooms show up immediately regardless of the revalidate window |
 
 ## Auth handling
 
