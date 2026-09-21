@@ -25,11 +25,11 @@ function makeBooking(overrides: Partial<Booking> = {}): Booking {
 describe("BookingRow", () => {
   it("renders room name, formatted date/time, and the status badge text", () => {
     render(
-      <BookingRow booking={makeBooking({ status: "PENDING" })} roomName="Room A" />
+      <BookingRow booking={makeBooking({ status: "CONFIRMED" })} roomName="Room A" />
     );
 
     expect(screen.getByText("Room A")).toBeInTheDocument();
-    expect(screen.getByText("PENDING")).toBeInTheDocument();
+    expect(screen.getByText("CONFIRMED")).toBeInTheDocument();
     expect(screen.getByText(/Sep 18, 2026/)).toBeInTheDocument();
   });
 
@@ -42,17 +42,6 @@ describe("BookingRow", () => {
     );
 
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
-  });
-
-  it("renders the cancel button for a PENDING booking", () => {
-    render(
-      <BookingRow
-        booking={makeBooking({ status: "PENDING" })}
-        roomName="Room A"
-      />
-    );
-
-    expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
   });
 
   it("renders the cancel button for a CONFIRMED booking", () => {

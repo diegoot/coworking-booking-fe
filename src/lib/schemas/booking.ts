@@ -40,9 +40,11 @@ export const availabilityResponseSchema = z.object({
 export type AvailabilityResponse = z.infer<typeof availabilityResponseSchema>;
 
 /**
- * A booking's lifecycle status, as returned by the backend.
+ * A booking's lifecycle status, as returned by the backend. Only two
+ * states: the backend creates every booking as `CONFIRMED` (no approval
+ * step), and the only other state a booking can move to is `CANCELLED`.
  */
-export const bookingStatusSchema = z.enum(["PENDING", "CONFIRMED", "CANCELLED"]);
+export const bookingStatusSchema = z.enum(["CONFIRMED", "CANCELLED"]);
 export type BookingStatus = z.infer<typeof bookingStatusSchema>;
 
 /**
