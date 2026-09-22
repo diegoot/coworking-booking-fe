@@ -1,4 +1,5 @@
 import type { Booking } from "@/lib/schemas/booking";
+import { isPast } from "@/lib/utils/is-past";
 
 /**
  * True once a booking's slot has fully ended. UI-only: the backend's
@@ -9,5 +10,5 @@ import type { Booking } from "@/lib/schemas/booking";
  * cancel anymore.
  */
 export function isBookingPast(booking: Booking): boolean {
-  return new Date(booking.endTime).getTime() < Date.now();
+  return isPast(booking.endTime);
 }

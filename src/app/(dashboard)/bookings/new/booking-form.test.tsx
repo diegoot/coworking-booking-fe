@@ -11,10 +11,18 @@ vi.mock("@/lib/actions/create-booking", () => ({
 
 const mockedCreateBookingAction = vi.mocked(createBookingAction);
 
+// Offsets from now, not fixed dates: `BookingForm` grays out any slot
+// whose start has already passed (see `isPast`), so a "free" fixture
+// meant to be selectable has to stay ahead of whenever the test suite
+// actually runs.
+function hoursFromNow(hours: number): string {
+  return new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
+}
+
 const slots: AvailabilitySlot[] = [
-  { start: "2026-09-18T09:00:00.000Z", end: "2026-09-18T10:00:00.000Z", status: "free" },
-  { start: "2026-09-18T10:00:00.000Z", end: "2026-09-18T11:00:00.000Z", status: "busy" },
-  { start: "2026-09-18T11:00:00.000Z", end: "2026-09-18T12:00:00.000Z", status: "free" },
+  { start: hoursFromNow(1), end: hoursFromNow(2), status: "free" },
+  { start: hoursFromNow(2), end: hoursFromNow(3), status: "busy" },
+  { start: hoursFromNow(3), end: hoursFromNow(4), status: "free" },
 ];
 
 describe("BookingForm", () => {
@@ -87,17 +95,33 @@ describe("BookingForm", () => {
     await waitFor(() => expect(mockedCreateBookingAction).toHaveBeenCalled());
     expect(mockedCreateBookingAction).toHaveBeenCalledWith({
       roomId: "room-1",
-      startTime: "2026-09-18T11:00:00.000Z",
-      endTime: "2026-09-18T12:00:00.000Z",
+      startTime: slots[2].start,
+      endTime: slots[2].end,
     });
   });
 
   it("disables submission when there are no free slots", () => {
     const busySlots: AvailabilitySlot[] = [
-      { start: "2026-09-18T09:00:00.000Z", end: "2026-09-18T10:00:00.000Z", status: "busy" },
+      { start: hoursFromNow(1), end: hoursFromNow(2), status: "busy" },
     ];
     render(<BookingForm roomId="room-1" slots={busySlots} />);
 
+    expect(screen.getByText(/no available slots/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /book now/i })).toBeDisabled();
+  });
+
+  it("grays out a free slot whose time has already passed today, labeled Past", () => {
+    const pastFreeSlots: AvailabilitySlot[] = [
+      {
+        start: "2026-09-18T09:00:00.000Z",
+        end: "2026-09-18T10:00:00.000Z",
+        status: "free",
+      },
+    ];
+    render(<BookingForm roomId="room-1" slots={pastFreeSlots} />);
+
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument();
+    expect(screen.getByText("Past")).toBeInTheDocument();
     expect(screen.getByText(/no available slots/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /book now/i })).toBeDisabled();
   });
