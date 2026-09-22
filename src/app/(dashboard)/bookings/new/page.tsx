@@ -55,9 +55,6 @@ export default async function NewBookingPage({
         (list + form) stream in together.
       */}
       <section className="mt-6 flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
-          Availability for {date}
-        </h2>
         <Suspense fallback={<AvailabilityLoading />}>
           <Availability roomId={room.id} date={date} />
         </Suspense>

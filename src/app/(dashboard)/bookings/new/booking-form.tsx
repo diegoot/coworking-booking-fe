@@ -36,9 +36,11 @@ import { isPast } from "@/lib/utils/is-past";
  */
 export function BookingForm({
   roomId,
+  date,
   slots,
 }: {
   roomId: string;
+  date: string;
   slots: AvailabilitySlot[];
 }) {
   const [serverError, setServerError] = useState<string | null>(null);
@@ -82,7 +84,7 @@ export function BookingForm({
         aria-describedby={errors.startTime ? "slot-error" : undefined}
       >
         <legend className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
-          Select a time slot
+          Select your time slot (date: {date})
         </legend>
 
         <div className="flex flex-col gap-2">
@@ -124,12 +126,6 @@ export function BookingForm({
             );
           })}
         </div>
-
-        {!hasSelectableSlots && (
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            No available slots for this room today.
-          </p>
-        )}
 
         {errors.startTime && (
           <p id="slot-error" role="alert" className="text-sm text-red-600">

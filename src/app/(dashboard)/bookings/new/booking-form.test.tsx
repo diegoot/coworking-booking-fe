@@ -27,7 +27,7 @@ const slots: AvailabilitySlot[] = [
 
 describe("BookingForm", () => {
   it("renders every slot in one list, only the free ones as selectable radios", () => {
-    render(<BookingForm roomId="room-1" slots={slots} />);
+    render(<BookingForm roomId="room-1" date="2026-09-22" slots={slots} />);
 
     expect(screen.getAllByRole("radio")).toHaveLength(2);
     // The busy slot still shows up in the list, just not as a radio.
@@ -36,7 +36,7 @@ describe("BookingForm", () => {
 
   it("blocks submission when no slot is selected", async () => {
     const user = userEvent.setup();
-    render(<BookingForm roomId="room-1" slots={slots} />);
+    render(<BookingForm roomId="room-1" date="2026-09-22" slots={slots} />);
 
     await user.click(screen.getByRole("button", { name: /book now/i }));
 
@@ -51,7 +51,7 @@ describe("BookingForm", () => {
       error: "This slot is no longer available",
     });
     const user = userEvent.setup();
-    render(<BookingForm roomId="room-1" slots={slots} />);
+    render(<BookingForm roomId="room-1" date="2026-09-22" slots={slots} />);
 
     await user.click(screen.getAllByRole("radio")[0]);
     await user.click(screen.getByRole("button", { name: /book now/i }));
@@ -70,7 +70,7 @@ describe("BookingForm", () => {
         })
     );
     const user = userEvent.setup();
-    render(<BookingForm roomId="room-1" slots={slots} />);
+    render(<BookingForm roomId="room-1" date="2026-09-22" slots={slots} />);
 
     await user.click(screen.getAllByRole("radio")[0]);
     await user.click(screen.getByRole("button", { name: /book now/i }));
@@ -85,7 +85,7 @@ describe("BookingForm", () => {
   it("submits the payload matching the selected slot, not just any free slot", async () => {
     mockedCreateBookingAction.mockResolvedValue(undefined);
     const user = userEvent.setup();
-    render(<BookingForm roomId="room-1" slots={slots} />);
+    render(<BookingForm roomId="room-1" date="2026-09-22" slots={slots} />);
 
     // slots[2] (the second free slot, since slots[1] is busy) is the
     // second radio rendered.
@@ -104,9 +104,8 @@ describe("BookingForm", () => {
     const busySlots: AvailabilitySlot[] = [
       { start: hoursFromNow(1), end: hoursFromNow(2), status: "busy" },
     ];
-    render(<BookingForm roomId="room-1" slots={busySlots} />);
+    render(<BookingForm roomId="room-1" date="2026-09-22" slots={busySlots} />);
 
-    expect(screen.getByText(/no available slots/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /book now/i })).toBeDisabled();
   });
 
@@ -118,11 +117,10 @@ describe("BookingForm", () => {
         status: "free",
       },
     ];
-    render(<BookingForm roomId="room-1" slots={pastFreeSlots} />);
+    render(<BookingForm roomId="room-1" date="2026-09-22" slots={pastFreeSlots} />);
 
     expect(screen.queryByRole("radio")).not.toBeInTheDocument();
     expect(screen.getByText("Past")).toBeInTheDocument();
-    expect(screen.getByText(/no available slots/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /book now/i })).toBeDisabled();
   });
 });

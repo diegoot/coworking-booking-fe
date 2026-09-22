@@ -27,5 +27,5 @@ export async function Availability({
     );
   }
 
-  return <BookingForm roomId={roomId} slots={availability.slots} />;
+  return <BookingForm roomId={roomId} date={date} slots={availability.slots} />;
 }
