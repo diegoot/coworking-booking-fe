@@ -239,7 +239,7 @@ describe("getBookingsForUser", () => {
     await getBookingsForUser("u2");
 
     const [url, init] = vi.mocked(global.fetch).mock.calls[0];
-    expect(url).toBe("http://api.test/bookings/u2");
+    expect(url).toBe("http://api.test/bookings?userId=u2");
     const headers = new Headers(init?.headers as HeadersInit);
     expect(headers.get("Authorization")).toBe("Bearer jwt.token.value");
     expect(init?.next).toEqual({ tags: ["admin-bookings"] });
@@ -262,6 +262,16 @@ describe("getBookingsForUser", () => {
     ) as unknown as typeof fetch;
 
     await expect(getBookingsForUser("u2")).rejects.toThrow(/permission/i);
+  });
+
+  it("throws an invalid-id error on a 422 (userId isn't a valid UUID)", async () => {
+    global.fetch = vi.fn().mockResolvedValue(
+      new Response(null, { status: 422 })
+    ) as unknown as typeof fetch;
+
+    await expect(getBookingsForUser("not-a-uuid")).rejects.toThrow(
+      /valid user id/i
+    );
   });
 
   it("returns an empty array when the backend returns 200 with []", async () => {

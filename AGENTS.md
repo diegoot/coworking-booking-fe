@@ -55,10 +55,8 @@ patterns already established in this project.
                               independent loading/error state
     @rooms                   parallel slot: room management (create room)
     @bookings                parallel slot: look up a specific user's
-                              bookings by user ID (the backend has no
-                              endpoint to list all users or all bookings
-                              across users, so this is a manual lookup,
-                              not a full roster)
+                              bookings, picked from a dropdown of every
+                              user (GET /users)
 ```
 
 ### "Book now" flow
@@ -127,16 +125,22 @@ GET    /rooms/:id/availability?date= (requires auth)
 GET    /bookings/me                  (requires auth, own bookings only)
   returns: list of the logged-in user's bookings
 
-GET    /bookings/:userId             (admin only)
-  returns: list of bookings for the given user
+GET    /bookings?date=&roomId=&userId=  (admin only, all filters optional and AND'd)
+  returns: bookings matching the given filters (no filters = every
+  booking in the system). This app only ever passes userId (the admin
+  lookup by user ID) — date/roomId filtering isn't used here.
 
-POST   /bookings                     (requires auth)
+POST   /bookings                     (regular users only, admins can't book)
   body: { roomId: string, startTime: DateTime, endTime: DateTime }
 
 DELETE /bookings/:id                 (booking owner or admin only)
 
 POST   /rooms                        (admin only)
   body: { name: string, capacity: number, pricePerHour: number }
+
+GET    /users                        (admin only)
+  returns: list of every user (id, name, email, role, createdAt),
+  used to populate the admin bookings lookup's user picker
 ```
 
 ## Guidelines

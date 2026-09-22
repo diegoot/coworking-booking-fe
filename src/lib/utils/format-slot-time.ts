@@ -11,8 +11,8 @@ import { BUSINESS_TIMEZONE } from "@/lib/utils/business-date";
  * themselves anchored to Argentina wall-clock time (see the backend's
  * `businessHours.ts`), so that's the only zone in which a slot's
  * displayed hour actually matches the real-world time someone in the
- * room would experience — a fixed-but-arbitrary zone (this used to be
- * UTC) would satisfy reason (1) while still showing the wrong hour.
+ * room would experience — any other fixed zone would satisfy reason
+ * (1) while still showing the wrong hour.
  */
 export function formatSlotTime(iso: string): string {
   return new Date(iso).toLocaleTimeString([], {

@@ -80,22 +80,28 @@ export async function getMyBookings(): Promise<Booking[]> {
 /**
  * SSR (`no-store`) per AGENTS.md's rendering strategy table ("`/admin`
  * (both slots) | SSR (`no-store`) | Admin data must be fresh"), admin
- * lookup of an arbitrary user's bookings via `GET /bookings/:userId`.
- * Tagged `"admin-bookings"` — deliberately different from
- * `getMyBookings()`'s `"bookings"` tag, since this is a different
- * audience (an admin looking up someone else's bookings) and nothing
- * should cross-invalidate between "my own bookings" and "admin lookup
- * of an arbitrary user".
+ * lookup of an arbitrary user's bookings via `GET /bookings?userId=`
+ * (admin-only; `date` and `roomId` are also accepted by that endpoint
+ * but unused here, since this lookup is by user only). Tagged
+ * `"admin-bookings"` — deliberately different from `getMyBookings()`'s
+ * `"bookings"` tag, since this is a different audience (an admin
+ * looking up someone else's bookings) and nothing should
+ * cross-invalidate between "my own bookings" and "admin lookup of an
+ * arbitrary user".
  *
- * No special 404 handling: the backend's `listBookingsForUser` does a
- * plain `findMany({ where: { userId } })` with no existence check on
- * the user, so a nonexistent/no-bookings userId returns `200` with
- * `[]`, never a 404.
+ * No special 404 handling: the backend does a plain
+ * `findMany({ where: { userId } })` with no existence check on the
+ * user, so a nonexistent/no-bookings userId returns `200` with `[]`,
+ * never a 404. It does, however, validate `userId` as a UUID (Zod, on
+ * the query param) — the lookup form's input is free text, so a
+ * malformed id surfaces as an explicit 422 instead of silently falling
+ * through to an empty result.
  */
 export async function getBookingsForUser(userId: string): Promise<Booking[]> {
-  const res = await authFetch(`${getApiUrl()}/bookings/${userId}`, {
-    next: { tags: ["admin-bookings"] },
-  });
+  const res = await authFetch(
+    `${getApiUrl()}/bookings?userId=${encodeURIComponent(userId)}`,
+    { next: { tags: ["admin-bookings"] } }
+  );
 
   if (res.status === 401) {
     // Same justification as `getMyBookings` above: `proxy.ts` only
@@ -108,6 +114,10 @@ export async function getBookingsForUser(userId: string): Promise<Booking[]> {
     // to admins, but the backend is the real authority, so handle this
     // defensively rather than assuming it can't occur.
     throw new Error("You don't have permission to view this user's bookings");
+  }
+
+  if (res.status === 422) {
+    throw new Error("That doesn't look like a valid user ID");
   }
 
   if (!res.ok) {
