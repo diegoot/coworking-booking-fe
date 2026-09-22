@@ -36,4 +36,13 @@ describe("BookNowButton", () => {
     const link = screen.getByRole("link", { name: /book now/i });
     expect(link).toHaveAttribute("href", "/bookings/new?room=room-1");
   });
+
+  it("renders nothing for an ADMIN session — admin doesn't book rooms for itself", () => {
+    useSessionStore.setState({
+      session: { id: "1", name: "Sample Admin", role: "ADMIN" },
+    });
+    const { container } = render(<BookNowButton roomId="room-1" />);
+
+    expect(container).toBeEmptyDOMElement();
+  });
 });

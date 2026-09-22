@@ -66,9 +66,11 @@ export function SiteHeader() {
         </div>
       ) : session ? (
         <>
-          <Link href="/bookings" className={navLinkClasses} onClick={closeMenu}>
-            My bookings
-          </Link>
+          {session.role !== "ADMIN" && (
+            <Link href="/bookings" className={navLinkClasses} onClick={closeMenu}>
+              My bookings
+            </Link>
+          )}
           {session.role === "ADMIN" && (
             <Link href="/admin" className={navLinkClasses} onClick={closeMenu}>
               Admin

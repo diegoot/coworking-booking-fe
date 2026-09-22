@@ -44,6 +44,9 @@ export async function createBookingAction(
     if (backendRes.status === 401) {
       return { error: "You must be logged in to book a room" };
     }
+    if (backendRes.status === 403) {
+      return { error: "Admin accounts can't book rooms" };
+    }
     if (backendRes.status === 409) {
       return { error: "This slot is no longer available" };
     }

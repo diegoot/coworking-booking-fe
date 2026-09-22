@@ -8,7 +8,11 @@ const buttonClasses =
 
 /**
  * Branches the "Book now" flow per AGENTS.md:
- * - Authenticated: navigate straight to `/bookings/new?room=[id]`.
+ * - Authenticated, not an admin: navigate straight to
+ *   `/bookings/new?room=[id]`.
+ * - Authenticated as ADMIN: renders nothing. Admin is an operational
+ *   role (manages rooms, looks up other users' bookings), not a
+ *   coworking member — it doesn't book rooms for itself.
  * - Not authenticated: send to `/login?redirect=...` so login sends the
  *   user back here on success.
  * - Session not yet resolved (`undefined` — see `lib/store/session.ts`):
@@ -31,6 +35,10 @@ export function BookNowButton({ roomId }: { roomId: string }) {
         Book now
       </span>
     );
+  }
+
+  if (session?.role === "ADMIN") {
+    return null;
   }
 
   const bookNowHref = `/bookings/new?room=${roomId}`;

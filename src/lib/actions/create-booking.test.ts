@@ -68,6 +68,16 @@ describe("createBookingAction", () => {
     expect(result).toEqual({ error: "You must be logged in to book a room" });
   });
 
+  it("maps a 403 to an admin-can't-book error instead of redirecting", async () => {
+    global.fetch = vi.fn().mockResolvedValue(
+      new Response(null, { status: 403 })
+    ) as unknown as typeof fetch;
+
+    const result = await createBookingAction(validValues);
+
+    expect(result).toEqual({ error: "Admin accounts can't book rooms" });
+  });
+
   it("returns a validation error without calling the backend for invalid input", async () => {
     global.fetch = vi.fn();
 

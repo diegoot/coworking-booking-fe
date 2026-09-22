@@ -56,6 +56,15 @@ describe("SiteHeader", () => {
     expect(screen.getAllByRole("link", { name: /^admin$/i }).length).toBeGreaterThan(0);
   });
 
+  it("hides My bookings for an ADMIN session — admin doesn't book rooms for itself", () => {
+    useSessionStore.setState({
+      session: { id: "1", name: "Sample Admin", role: "ADMIN" },
+    });
+    render(<SiteHeader />);
+
+    expect(screen.queryByRole("link", { name: /my bookings/i })).not.toBeInTheDocument();
+  });
+
   it("renders Log in as non-interactive current-page text while on /login", () => {
     useSessionStore.setState({ session: null });
     mockedPathname.value = "/login";
