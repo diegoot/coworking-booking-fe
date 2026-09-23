@@ -100,3 +100,37 @@ Open [http://localhost:3000](http://localhost:3000).
 - **End-to-end tests**: Playwright, configured in `playwright.config.ts`.
   `npm run test:e2e` starts the dev server automatically if it isn't
   already running.
+
+## Missing
+
+- **End-to-end coverage for the key flows.** Playwright specs today only
+  cover Home and the room detail modal — login/redirect-back, creating
+  and cancelling a booking, and admin gating are still untested
+  end-to-end (unit/component tests do cover them individually).
+
+## Possible improvements
+
+Known gaps, left out of scope on purpose for this portfolio project:
+
+- **Split "My bookings" into past and upcoming.** Everything renders in
+  one flat list today.
+- **Reject cancelling a past booking on the backend.**
+  `DELETE /bookings/:id` doesn't check `endTime` against now — the
+  frontend only hides the Cancel button for past bookings (UI-only, not
+  enforced).
+- **Reject booking an already-expired slot on the backend.**
+  `POST /bookings` doesn't check `startTime` against now — the frontend
+  only grays out past slots (UI-only, not enforced).
+- **Let admins delete rooms.** No `DELETE /rooms/:id` endpoint exists on
+  the backend yet.
+- **Expose date/room filtering in the admin bookings lookup.** The
+  backend's `GET /bookings` already supports `date`/`roomId` filters —
+  the frontend only ever passes `userId`.
+- **Let a user book a day other than today.** `/bookings/new` has no
+  date picker — availability is always for today.
+- **Confirm cancellation with a reason.** Cancelling has no confirmation
+  step or way to record why.
+- **Improve accessibility.** Forms have baseline ARIA
+  (`aria-invalid`/`aria-describedby`/`role="alert"`), but coverage isn't
+  comprehensive across the app.
+- **Improve e2e test coverage** beyond the two flows tested today.
