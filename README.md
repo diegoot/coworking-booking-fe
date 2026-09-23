@@ -7,6 +7,31 @@ API (separate repo, Express backend).
 See [AGENTS.md](./AGENTS.md) for the full spec: routing approach,
 rendering strategy per route, auth handling, and backend endpoints.
 
+## Live Demo
+
+**⚠️ Portfolio/demo environment** — not a real production system. Data
+resets periodically and credentials below are intentionally public for
+reviewers.
+
+- App: https://coworking-booking-fe.vercel.app/
+- Backend: hosted on Render's free tier — the first request after a
+  period of inactivity may take 30-50s (cold start), which can make the
+  first page load feel slow.
+
+### Demo credentials
+
+Admin:
+
+```json
+{ "email": "admin@example.com", "password": "Admin1234!" }
+```
+
+Sample users (password `password123` for all):
+
+- user1@example.com
+- user2@example.com
+- user3@example.com
+
 ## Requirements
 
 - Node.js 20.9+
