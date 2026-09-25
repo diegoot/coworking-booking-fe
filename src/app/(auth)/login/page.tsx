@@ -18,13 +18,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+      <h1 className="text-2xl font-semibold tracking-tight text-base-content">
         Log in
       </h1>
       {registered && (
-        <p className="rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-          Account created. Log in with your new credentials.
-        </p>
+        <div role="status" className="alert alert-success text-sm">
+          <span>Account created. Log in with your new credentials.</span>
+        </div>
       )}
       <LoginForm redirectTo={redirectTo} />
     </div>

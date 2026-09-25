@@ -39,10 +39,7 @@ export function RegisterForm() {
       noValidate
     >
       <div className="flex flex-col gap-1">
-        <label
-          htmlFor="name"
-          className="text-sm font-medium text-zinc-900 dark:text-zinc-50"
-        >
+        <label htmlFor="name" className="label font-medium">
           Name
         </label>
         <input
@@ -50,21 +47,18 @@ export function RegisterForm() {
           autoComplete="name"
           aria-invalid={errors.name ? true : undefined}
           aria-describedby={errors.name ? "name-error" : undefined}
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          className="input w-full"
           {...register("name")}
         />
         {errors.name && (
-          <p id="name-error" className="text-sm text-red-600">
+          <p id="name-error" className="text-sm text-error">
             {errors.name.message}
           </p>
         )}
       </div>
 
       <div className="flex flex-col gap-1">
-        <label
-          htmlFor="email"
-          className="text-sm font-medium text-zinc-900 dark:text-zinc-50"
-        >
+        <label htmlFor="email" className="label font-medium">
           Email
         </label>
         <input
@@ -73,21 +67,18 @@ export function RegisterForm() {
           autoComplete="email"
           aria-invalid={errors.email ? true : undefined}
           aria-describedby={errors.email ? "email-error" : undefined}
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          className="input w-full"
           {...register("email")}
         />
         {errors.email && (
-          <p id="email-error" className="text-sm text-red-600">
+          <p id="email-error" className="text-sm text-error">
             {errors.email.message}
           </p>
         )}
       </div>
 
       <div className="flex flex-col gap-1">
-        <label
-          htmlFor="password"
-          className="text-sm font-medium text-zinc-900 dark:text-zinc-50"
-        >
+        <label htmlFor="password" className="label font-medium">
           Password
         </label>
         <input
@@ -96,36 +87,33 @@ export function RegisterForm() {
           autoComplete="new-password"
           aria-invalid={errors.password ? true : undefined}
           aria-describedby={errors.password ? "password-error" : undefined}
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          className="input w-full"
           {...register("password")}
         />
         {errors.password && (
-          <p id="password-error" className="text-sm text-red-600">
+          <p id="password-error" className="text-sm text-error">
             {errors.password.message}
           </p>
         )}
       </div>
 
       {serverError && (
-        <p role="alert" className="text-sm text-red-600">
-          {serverError}
-        </p>
+        <div role="alert" className="alert alert-error text-sm">
+          <span>{serverError}</span>
+        </div>
       )}
 
       <button
         type="submit"
         disabled={isSubmitting}
-        className="mt-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        className="btn btn-primary mt-2"
       >
         {isSubmitting ? "Creating account..." : "Sign up"}
       </button>
 
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="text-sm text-base-content/70">
         Already have an account?{" "}
-        <Link
-          href="/login"
-          className="font-medium text-zinc-900 underline dark:text-zinc-50"
-        >
+        <Link href="/login" className="link link-hover font-medium">
           Log in
         </Link>
       </p>

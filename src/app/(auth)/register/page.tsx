@@ -5,7 +5,7 @@ import { RegisterForm } from "./register-form";
 export default function RegisterPage() {
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+      <h1 className="text-2xl font-semibold tracking-tight text-base-content">
         Create an account
       </h1>
       <RegisterForm />
