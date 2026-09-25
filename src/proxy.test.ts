@@ -14,6 +14,17 @@ function request(url: string, cookie?: string) {
   return new NextRequest(new Request(url, { headers }));
 }
 
+function fakeJwt(expiresInSeconds: number): string {
+  const payload = { exp: Math.floor(Date.now() / 1000) + expiresInSeconds };
+  const base64 = btoa(JSON.stringify(payload))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+  return `header.${base64}.signature`;
+}
+
+const validToken = fakeJwt(3600);
+
 describe("proxy", () => {
   it("redirects unauthenticated requests to /bookings to /login with ?redirect=", () => {
     const res = proxy(request("http://localhost/bookings/new?room=1"));
@@ -24,11 +35,53 @@ describe("proxy", () => {
     );
   });
 
+  it("clears a stale session_user cookie when session_token is missing", () => {
+    const res = proxy(
+      request(
+        "http://localhost/bookings/new?room=1",
+        `${SESSION_USER_COOKIE}=${encodeURIComponent(
+          JSON.stringify({ id: "1", name: "Jane", role: "USER" })
+        )}`
+      )
+    );
+
+    expect(res.status).toBe(307);
+    expect(res.cookies.get(SESSION_USER_COOKIE)?.value).toBe("");
+  });
+
+  it("redirects to /login when session_token is present but its JWT has expired", () => {
+    const res = proxy(
+      request(
+        "http://localhost/admin",
+        `${SESSION_TOKEN_COOKIE}=${fakeJwt(-60)}; ${SESSION_USER_COOKIE}=${encodeURIComponent(
+          JSON.stringify({ id: "1", name: "Jane", role: "ADMIN" })
+        )}`
+      )
+    );
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe(
+      "http://localhost/login?redirect=%2Fadmin"
+    );
+    expect(res.cookies.get(SESSION_USER_COOKIE)?.value).toBe("");
+  });
+
+  it("redirects to /login when session_token is present but malformed", () => {
+    const res = proxy(
+      request("http://localhost/bookings", `${SESSION_TOKEN_COOKIE}=not-a-jwt`)
+    );
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe(
+      "http://localhost/login?redirect=%2Fbookings"
+    );
+  });
+
   it("passes through authenticated requests (session cookie present)", () => {
     const res = proxy(
       request(
         "http://localhost/bookings/new?room=1",
-        `${SESSION_TOKEN_COOKIE}=jwt.token.value`
+        `${SESSION_TOKEN_COOKIE}=${validToken}`
       )
     );
 
@@ -51,7 +104,7 @@ describe("proxy", () => {
     const res = proxy(
       request(
         "http://localhost/admin",
-        `${SESSION_TOKEN_COOKIE}=jwt.token.value`
+        `${SESSION_TOKEN_COOKIE}=${validToken}`
       )
     );
 
@@ -63,7 +116,7 @@ describe("proxy", () => {
     const res = proxy(
       request(
         "http://localhost/admin",
-        `${SESSION_TOKEN_COOKIE}=jwt.token.value; ${SESSION_USER_COOKIE}=not-json`
+        `${SESSION_TOKEN_COOKIE}=${validToken}; ${SESSION_USER_COOKIE}=not-json`
       )
     );
 
@@ -75,7 +128,7 @@ describe("proxy", () => {
     const res = proxy(
       request(
         "http://localhost/admin",
-        `${SESSION_TOKEN_COOKIE}=jwt.token.value; ${SESSION_USER_COOKIE}=${encodeURIComponent(
+        `${SESSION_TOKEN_COOKIE}=${validToken}; ${SESSION_USER_COOKIE}=${encodeURIComponent(
           JSON.stringify({ id: "1" })
         )}`
       )
@@ -89,7 +142,7 @@ describe("proxy", () => {
     const res = proxy(
       request(
         "http://localhost/admin",
-        `${SESSION_TOKEN_COOKIE}=jwt.token.value; ${SESSION_USER_COOKIE}=${encodeURIComponent(
+        `${SESSION_TOKEN_COOKIE}=${validToken}; ${SESSION_USER_COOKIE}=${encodeURIComponent(
           JSON.stringify({ id: "1", name: "Jane", role: "USER" })
         )}`
       )
@@ -103,7 +156,7 @@ describe("proxy", () => {
     const res = proxy(
       request(
         "http://localhost/admin",
-        `${SESSION_TOKEN_COOKIE}=jwt.token.value; ${SESSION_USER_COOKIE}=${encodeURIComponent(
+        `${SESSION_TOKEN_COOKIE}=${validToken}; ${SESSION_USER_COOKIE}=${encodeURIComponent(
           JSON.stringify({ id: "1", name: "Jane", role: "ADMIN" })
         )}`
       )
@@ -116,7 +169,7 @@ describe("proxy", () => {
     const res = proxy(
       request(
         "http://localhost/bookings/new?room=1",
-        `${SESSION_TOKEN_COOKIE}=jwt.token.value`
+        `${SESSION_TOKEN_COOKIE}=${validToken}`
       )
     );
 

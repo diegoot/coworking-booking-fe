@@ -5,6 +5,7 @@ import {
   SESSION_USER_COOKIE,
 } from "@/lib/constants/cookies";
 import { sessionUserSchema } from "@/lib/schemas/auth";
+import { isJwtExpired } from "@/lib/utils/jwt";
 
 /**
  * Gates access to the `(dashboard)` route group.
@@ -14,15 +15,22 @@ import { sessionUserSchema } from "@/lib/schemas/auth";
  * hydrating client-side UI, see `SessionHydrator`, and is not valid for
  * authorization) for the base authentication check below.
  *
- * This only checks for the cookie's presence, not its signature or
- * expiry — real enforcement happens backend-side on every authenticated
- * call. That's intentional (see AGENTS.md / project plan), not an
- * oversight.
+ * Checks both the cookie's presence AND the JWT's own `exp` claim
+ * (via `isJwtExpired`, unverified — see its own doc comment) so an
+ * expired-but-still-present token is caught here, before any page under
+ * `/admin` or `/bookings` renders, rather than depending on every
+ * individual data-fetching function under those routes to notice a 401
+ * from the backend and redirect itself (some, like `getRooms()`, hit
+ * public endpoints and never would). This is still not the real
+ * authorization boundary — that's the backend's signature verification
+ * on every authenticated call — just a UX-level gate that keeps
+ * "logged out" consistent across every page in these route groups
+ * instead of only the ones whose fetch happens to check.
  *
  * The `/admin` role check further down is the one exception that DOES
  * read `session_user`: role isn't derivable from the JWT here without
- * adding a decode/verify dependency to the proxy, and `session_user` is
- * the only place that role is already mirrored. This is explicitly a
+ * adding a signature-verifying dependency to the proxy, and `session_user`
+ * is the only place that role is already mirrored. This is explicitly a
  * UX-level gate only (it avoids rendering the admin shell for non-admins)
  * — it is not the authorization boundary. That boundary is the backend's
  * existing `authenticate + authorize("ADMIN")` middleware on
@@ -37,9 +45,9 @@ import { sessionUserSchema } from "@/lib/schemas/auth";
 export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const hasSessionToken = request.cookies.has(SESSION_TOKEN_COOKIE);
+  const sessionToken = request.cookies.get(SESSION_TOKEN_COOKIE)?.value;
 
-  if (!hasSessionToken) {
+  if (!sessionToken || isJwtExpired(sessionToken)) {
     // Mirrors the `?redirect=` shape already used by the unauthenticated
     // "Book now" flow (see `(public)/rooms/[id]/book-now-button.tsx`):
     // encodeURIComponent of the full path + query, consumed by
@@ -49,7 +57,16 @@ export default function proxy(request: NextRequest) {
       `/login?redirect=${encodeURIComponent(target)}`,
       request.url
     );
-    return NextResponse.redirect(loginUrl);
+    const response = NextResponse.redirect(loginUrl);
+
+    // The token is missing or expired, but `session_user` (the readable
+    // mirror `SessionHydrator` uses to populate the header) has no
+    // expiry of its own and could still be sitting in the browser —
+    // clear it here too, so the two cookies can't fall out of sync and
+    // leave the header showing a stale logged-in state.
+    response.cookies.delete(SESSION_USER_COOKIE);
+
+    return response;
   }
 
   if (pathname.startsWith("/admin")) {
