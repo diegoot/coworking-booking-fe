@@ -139,4 +139,8 @@ Known gaps, left out of scope on purpose for this portfolio project:
   photo.
 - **Let admins define per-room amenities.** The amenity list (wifi, A/C,
   coffee machine, etc.) shown on the room detail and "New booking" pages
-  is hardcoded and identical for every room.
+  is hardcoded and identical for every room. Needs backend support for
+  an amenity catalog first (see the backend's own Possible improvements);
+  on the frontend, this also means a new Admin tab for managing the
+  catalog (add/remove available amenities) and letting an admin pick a
+  room's amenities from it when creating/editing a room.
