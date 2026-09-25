@@ -48,12 +48,12 @@ export function CancelButton({ bookingId }: { bookingId: string }) {
         type="button"
         onClick={handleClick}
         disabled={isPending}
-        className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-900 hover:bg-zinc-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-50 dark:hover:bg-zinc-800 dark:focus-visible:ring-zinc-100"
+        className="btn btn-outline btn-xs"
       >
         {isPending ? "Cancelling..." : "Cancel"}
       </button>
       {error && (
-        <p role="alert" className="text-xs text-red-600">
+        <p role="alert" className="text-xs text-error">
           {error}
         </p>
       )}

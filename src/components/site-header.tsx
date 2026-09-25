@@ -1,15 +1,46 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { logout } from "@/lib/actions/logout";
 import { useSessionStore } from "@/lib/store/session";
 
-const navLinkClasses =
-  "text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50";
+const navLinkClasses = "text-sm text-neutral-content/70 hover:text-neutral-content";
 
-const currentPageClasses = "text-sm font-medium text-zinc-900 dark:text-zinc-50";
+const currentPageClasses = "text-sm font-medium text-neutral-content";
+
+/**
+ * Renders the current page's own nav item as plain (non-interactive,
+ * non-hoverable) text instead of a link back to the page you're
+ * already on — same treatment for every nav item, not just login.
+ */
+function NavLink({
+  href,
+  pathname,
+  onClick,
+  children,
+}: {
+  href: string;
+  pathname: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  if (pathname === href) {
+    return (
+      <span aria-current="page" className={currentPageClasses}>
+        {children}
+      </span>
+    );
+  }
+
+  return (
+    <Link href={href} className={navLinkClasses} onClick={onClick}>
+      {children}
+    </Link>
+  );
+}
 
 /**
  * Session-aware nav shared by every route group. Client Component
@@ -51,9 +82,9 @@ export function SiteHeader() {
 
   const navLinks = (
     <>
-      <Link href="/how-it-works" className={navLinkClasses} onClick={closeMenu}>
+      <NavLink href="/how-it-works" pathname={pathname} onClick={closeMenu}>
         How it works
-      </Link>
+      </NavLink>
 
       {session === undefined ? (
         <div
@@ -61,47 +92,41 @@ export function SiteHeader() {
           aria-hidden="true"
           data-testid="session-skeleton"
         >
-          <span className="h-4 w-16 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
-          <span className="h-8 w-20 animate-pulse rounded-md bg-zinc-200 dark:bg-zinc-800" />
+          <span className="skeleton h-4 w-16" />
+          <span className="skeleton h-8 w-20 rounded-md" />
         </div>
       ) : session ? (
         <>
           {session.role !== "ADMIN" && (
-            <Link href="/bookings" className={navLinkClasses} onClick={closeMenu}>
+            <NavLink href="/bookings" pathname={pathname} onClick={closeMenu}>
               My bookings
-            </Link>
+            </NavLink>
           )}
           {session.role === "ADMIN" && (
-            <Link href="/admin" className={navLinkClasses} onClick={closeMenu}>
+            <NavLink href="/admin" pathname={pathname} onClick={closeMenu}>
               Admin
-            </Link>
+            </NavLink>
           )}
-          <span className="text-sm text-zinc-500 dark:text-zinc-400">
+          <span className="text-sm text-neutral-content/70">
             {session.name}
           </span>
           <button
             type="button"
             onClick={handleLogout}
-            className="text-sm font-medium text-zinc-900 hover:underline dark:text-zinc-50"
+            className="text-sm font-medium text-neutral-content hover:text-neutral-content/80"
           >
             Log out
           </button>
         </>
       ) : (
         <>
-          {pathname === "/login" ? (
-            <span aria-current="page" className={currentPageClasses}>
-              Log in
-            </span>
-          ) : (
-            <Link href="/login" className={navLinkClasses} onClick={closeMenu}>
-              Log in
-            </Link>
-          )}
+          <NavLink href="/login" pathname={pathname} onClick={closeMenu}>
+            Log in
+          </NavLink>
           {pathname === "/register" ? (
             <span
               aria-current="page"
-              className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-500 dark:border-zinc-700 dark:text-zinc-400"
+              className="btn btn-disabled btn-sm border-neutral-content/30 bg-transparent text-neutral-content/40"
             >
               Sign up
             </span>
@@ -109,7 +134,7 @@ export function SiteHeader() {
             <Link
               href="/register"
               onClick={closeMenu}
-              className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+              className="btn btn-primary btn-sm"
             >
               Sign up
             </Link>
@@ -120,52 +145,35 @@ export function SiteHeader() {
   );
 
   return (
-    <header className="border-b border-zinc-200 dark:border-zinc-800">
-      <nav className="mx-auto w-full max-w-3xl px-6 py-4">
-        <div className="flex items-center gap-6">
-          <Link
-            href="/"
-            className="font-semibold text-zinc-900 dark:text-zinc-50"
-          >
-            Coworking Booking
-          </Link>
+    <header className="sticky top-0 z-20 bg-neutral shadow-sm">
+      <nav className="navbar mx-auto flex w-full max-w-3xl items-center justify-between px-6">
+        <Link href="/" className="text-lg font-semibold text-neutral-content">
+          Coworking Booking
+        </Link>
 
-          <div className="ml-auto hidden items-center gap-6 md:flex">
-            {navLinks}
-          </div>
+        <div className="hidden items-center gap-6 md:flex">{navLinks}</div>
 
+        <div className="md:hidden">
           <button
             type="button"
             aria-expanded={isMenuOpen}
             aria-controls="site-header-menu"
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
             onClick={() => setIsMenuOpen((open) => !open)}
-            className="ml-auto flex items-center justify-center rounded-md p-2 text-zinc-700 hover:bg-zinc-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:focus-visible:ring-zinc-100 md:hidden"
+            className="btn btn-ghost btn-square text-neutral-content hover:bg-neutral-content/10"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-6 w-6"
-              aria-hidden="true"
-            >
-              {isMenuOpen ? (
-                <path d="M6 6L18 18M6 18L18 6" />
-              ) : (
-                <path d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
+            {isMenuOpen ? (
+              <X className="h-6 w-6" aria-hidden="true" />
+            ) : (
+              <Menu className="h-6 w-6" aria-hidden="true" />
+            )}
           </button>
         </div>
 
         {isMenuOpen && (
           <div
             id="site-header-menu"
-            className="mt-4 flex flex-col items-start gap-4 md:hidden"
+            className="absolute inset-x-0 top-full z-10 flex w-full flex-col items-start gap-4 bg-neutral px-6 pb-4 shadow-md md:hidden"
           >
             {navLinks}
           </div>

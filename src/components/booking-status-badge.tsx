@@ -9,16 +9,13 @@ import type { BookingStatus } from "@/lib/schemas/booking";
  * independently.
  */
 const statusBadgeClasses: Record<BookingStatus, string> = {
-  CONFIRMED:
-    "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  CANCELLED: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
+  CONFIRMED: "badge-success",
+  CANCELLED: "badge-ghost",
 };
 
 export function BookingStatusBadge({ status }: { status: BookingStatus }) {
   return (
-    <span
-      className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusBadgeClasses[status]}`}
-    >
+    <span className={`badge badge-sm ${statusBadgeClasses[status]}`}>
       {status}
     </span>
   );
