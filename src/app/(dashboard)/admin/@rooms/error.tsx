@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
+import { AlertTriangle } from "lucide-react";
+
 export default function RoomsError({
   error,
   reset,
@@ -7,18 +10,22 @@ export default function RoomsError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    console.error(error);
+  }, [error]);
+
   return (
-    <div className="flex flex-col items-center gap-4 rounded-md border border-zinc-200 p-6 text-center dark:border-zinc-800">
-      <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+    <div className="card card-border bg-base-100 shadow-sm flex flex-col items-center gap-3 p-8 text-center">
+      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-error/10 text-error">
+        <AlertTriangle className="h-6 w-6" aria-hidden="true" />
+      </span>
+      <h2 className="text-lg font-semibold text-base-content">
         Couldn&apos;t load rooms
       </h2>
-      <p className="text-zinc-600 dark:text-zinc-400">
-        {error.message || "Something went wrong while fetching rooms."}
+      <p className="max-w-xs text-sm text-base-content/70">
+        Something went wrong on our end. Give it another try.
       </p>
-      <button
-        onClick={reset}
-        className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-      >
+      <button onClick={reset} className="btn btn-primary mt-1">
         Try again
       </button>
     </div>

@@ -36,17 +36,14 @@ export async function BookingsLookupForm({
   return (
     <Form action="/admin" className="flex items-end gap-2">
       <div className="flex flex-1 flex-col">
-        <label
-          htmlFor="userId"
-          className="mb-1 text-sm font-medium text-zinc-900 dark:text-zinc-50"
-        >
+        <label htmlFor="userId" className="label font-medium">
           User
         </label>
         <select
           id="userId"
           name="userId"
           defaultValue={defaultUserId ?? ""}
-          className="h-10 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:focus:ring-zinc-100"
+          className="select w-full"
         >
           <option value="" disabled>
             Select a user
@@ -58,10 +55,7 @@ export async function BookingsLookupForm({
           ))}
         </select>
       </div>
-      <button
-        type="submit"
-        className="h-10 appearance-none rounded-md bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
-      >
+      <button type="submit" className="btn btn-primary">
         Look up
       </button>
     </Form>

@@ -7,10 +7,10 @@ export default function BookingsLookupFormLoading() {
   return (
     <div className="flex items-end gap-2" aria-hidden="true">
       <div className="flex flex-1 flex-col">
-        <div className="mb-1 h-4 w-10 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
-        <div className="h-10 w-full animate-pulse rounded-md bg-zinc-200 dark:bg-zinc-800" />
+        <div className="skeleton mb-1 h-4 w-10" />
+        <div className="skeleton h-10 w-full rounded-md" />
       </div>
-      <div className="h-10 w-24 animate-pulse rounded-md bg-zinc-200 dark:bg-zinc-800" />
+      <div className="skeleton h-10 w-24 rounded-md" />
     </div>
   );
 }

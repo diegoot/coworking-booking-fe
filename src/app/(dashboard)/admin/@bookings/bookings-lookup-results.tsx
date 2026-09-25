@@ -19,7 +19,7 @@ export async function BookingsLookupResults({ userId }: { userId: string }) {
 
   if (bookings.length === 0) {
     return (
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="text-sm text-base-content/70">
         No bookings for this user.
       </p>
     );

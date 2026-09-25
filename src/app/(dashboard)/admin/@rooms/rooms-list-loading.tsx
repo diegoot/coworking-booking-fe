@@ -8,12 +8,9 @@ export default function RoomsListLoading() {
   return (
     <ul className="flex flex-col gap-2" aria-hidden="true">
       {[0, 1, 2].map((i) => (
-        <li
-          key={i}
-          className="flex flex-col gap-2 rounded-md border border-zinc-200 p-3 dark:border-zinc-800"
-        >
-          <div className="h-4 w-32 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
-          <div className="h-3.5 w-40 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
+        <li key={i} className="card card-border bg-base-100 shadow-sm flex-col gap-2 p-3">
+          <div className="skeleton h-4 w-32" />
+          <div className="skeleton h-3.5 w-40" />
         </li>
       ))}
     </ul>

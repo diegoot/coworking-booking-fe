@@ -20,7 +20,7 @@ export default async function AdminBookingsSlot({
 
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+      <h2 className="text-lg font-semibold text-base-content">
         Look up bookings by user
       </h2>
       <Suspense fallback={<BookingsLookupFormLoading />}>
@@ -32,7 +32,7 @@ export default async function AdminBookingsSlot({
           <BookingsLookupResults userId={userId} />
         </Suspense>
       ) : (
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="text-sm text-base-content/70">
           Select a user to view their bookings.
         </p>
       )}
