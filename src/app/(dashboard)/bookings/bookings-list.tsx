@@ -16,7 +16,7 @@ export async function BookingsList() {
 
   if (bookings.length === 0) {
     return (
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="text-sm text-base-content/70">
         You don&apos;t have any bookings yet.
       </p>
     );

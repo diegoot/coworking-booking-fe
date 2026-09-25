@@ -21,7 +21,7 @@ export async function Availability({
 
   if (!availability) {
     return (
-      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="text-sm text-base-content/70">
         Availability is not available for this room.
       </p>
     );

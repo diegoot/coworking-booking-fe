@@ -18,15 +18,13 @@ export function BookingRow({
   roomName: string;
 }) {
   return (
-    <li className="flex flex-col gap-3 rounded-md border border-zinc-200 p-4 dark:border-zinc-800 sm:flex-row sm:items-start sm:justify-between">
+    <li className="card card-border bg-base-100 shadow-sm flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between">
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
-            {roomName}
-          </p>
+          <p className="text-sm font-medium text-base-content">{roomName}</p>
           <BookingStatusBadge status={booking.status} />
         </div>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="text-sm text-base-content/70">
           {formatBookingDate(booking.startTime)} &middot;{" "}
           {formatSlotTime(booking.startTime)} &ndash;{" "}
           {formatSlotTime(booking.endTime)}

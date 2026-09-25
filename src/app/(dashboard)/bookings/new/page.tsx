@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getRoomById } from "@/lib/data/rooms";
 import { getBusinessToday } from "@/lib/utils/business-date";
+import { RoomAmenities } from "@/components/room-amenities";
 import { Availability } from "./availability";
 import AvailabilityLoading from "./availability-loading";
 
@@ -33,16 +34,20 @@ export default async function NewBookingPage({
 
   return (
     <main className="mx-auto w-full max-w-2xl flex-1 px-6 py-12">
-      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-        New booking
+      <h1 className="text-2xl font-semibold tracking-tight text-base-content">
+        Book <span className="text-base-content/60">{room.name}</span>
       </h1>
-      <div className="mt-4 flex flex-col gap-1">
-        <p className="text-base font-medium text-zinc-900 dark:text-zinc-50">
-          {room.name}
-        </p>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          {room.capacity} people &middot; ${room.pricePerHour}/hour
-        </p>
+
+      <div className="card card-border bg-base-100 shadow-sm mt-4">
+        <div className="card-body gap-3">
+          <div className="flex gap-2">
+            <span className="badge badge-ghost">{room.capacity} people</span>
+            <span className="badge badge-accent badge-outline">
+              ${room.pricePerHour}/hr
+            </span>
+          </div>
+          <RoomAmenities />
+        </div>
       </div>
 
       {/*

@@ -76,18 +76,19 @@ export function BookingForm({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col gap-4"
+      className="flex flex-col gap-2"
       noValidate
     >
+      <h2 id="slot-label" className="text-sm font-medium text-base-content">
+        Select your time slot (date: {date})
+      </h2>
+
       <fieldset
-        className="flex flex-col gap-2"
+        className="card card-border bg-base-100 shadow-sm mb-2 flex flex-col gap-3 p-4"
+        aria-labelledby="slot-label"
         aria-describedby={errors.startTime ? "slot-error" : undefined}
       >
-        <legend className="text-sm font-medium text-zinc-900 dark:text-zinc-50">
-          Select your time slot (date: {date})
-        </legend>
-
-        <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {slots.map((slot) => {
             const isPastSlot = isPast(slot.start);
             const isSelectable = slot.status === "free" && !isPastSlot;
@@ -95,32 +96,39 @@ export function BookingForm({
             return (
               <label
                 key={slot.start}
-                className={`flex items-center justify-between rounded-md border px-3 py-2 text-sm transition-colors ${
+                className={`flex flex-col items-center gap-1 rounded-xl border-2 px-2 py-3 text-center text-sm transition-colors ${
                   isSelectable
-                    ? `cursor-pointer focus-within:ring-2 focus-within:ring-zinc-900 dark:focus-within:ring-zinc-100 ${
+                    ? `cursor-pointer focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2 ${
                         isSelected
-                          ? "border-zinc-900 bg-zinc-100 dark:border-zinc-100 dark:bg-zinc-800"
-                          : "border-zinc-300 dark:border-zinc-700"
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-base-300 hover:border-primary hover:bg-primary/5"
                       }`
-                    : "cursor-not-allowed border-zinc-200 opacity-50 dark:border-zinc-800"
+                    : "cursor-not-allowed border-base-200 bg-base-200/50 opacity-60"
                 }`}
               >
-                <span className="text-zinc-900 dark:text-zinc-50">
-                  {formatSlotTime(slot.start)} &ndash; {formatSlotTime(slot.end)}
+                <span className="font-medium">
+                  {formatSlotTime(slot.start)}
                 </span>
-                {isSelectable ? (
+                <span
+                  className={
+                    isSelectable ? "text-xs opacity-80" : "text-xs opacity-70"
+                  }
+                >
+                  {isSelectable
+                    ? formatSlotTime(slot.end)
+                    : isPastSlot
+                      ? "Past"
+                      : "Busy"}
+                </span>
+                {isSelectable && (
                   <input
                     type="radio"
                     name="slot"
                     value={slot.start}
                     checked={isSelected}
                     onChange={() => handleSlotSelect(slot)}
-                    className="h-4 w-4 accent-zinc-900 dark:accent-zinc-100"
+                    className="sr-only"
                   />
-                ) : (
-                  <span className="text-xs font-medium text-zinc-500 dark:text-zinc-500">
-                    {isPastSlot ? "Past" : "Busy"}
-                  </span>
                 )}
               </label>
             );
@@ -128,22 +136,22 @@ export function BookingForm({
         </div>
 
         {errors.startTime && (
-          <p id="slot-error" role="alert" className="text-sm text-red-600">
+          <p id="slot-error" role="alert" className="text-sm text-error">
             Please select an available time slot
           </p>
         )}
       </fieldset>
 
       {serverError && (
-        <p role="alert" className="text-sm text-red-600">
-          {serverError}
-        </p>
+        <div role="alert" className="alert alert-error text-sm">
+          <span>{serverError}</span>
+        </div>
       )}
 
       <button
         type="submit"
         disabled={isSubmitting || !hasSelectableSlots}
-        className="mt-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
+        className="btn btn-primary mt-2"
       >
         {isSubmitting ? "Booking..." : "Book now"}
       </button>

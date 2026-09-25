@@ -6,21 +6,18 @@
  */
 export default function AvailabilityLoading() {
   return (
-    <div className="flex flex-col gap-6" aria-hidden="true">
-      <ul className="flex flex-col gap-1.5">
-        {[0, 1, 2, 3].map((i) => (
-          <li
-            key={i}
-            className="h-9 w-full animate-pulse rounded-md bg-zinc-200 dark:bg-zinc-800"
-          />
-        ))}
-      </ul>
+    <div className="flex flex-col gap-2" aria-hidden="true">
+      <div className="skeleton h-4 w-48" />
 
-      <div className="flex flex-col gap-3">
-        <div className="h-4 w-32 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
-        <div className="h-10 w-full animate-pulse rounded-md bg-zinc-100 dark:bg-zinc-900" />
-        <div className="h-10 w-32 animate-pulse rounded-md bg-zinc-200 dark:bg-zinc-800" />
+      <div className="card card-border bg-base-100 shadow-sm mb-2 flex flex-col gap-3 p-4">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="skeleton h-16 rounded-xl" />
+          ))}
+        </div>
       </div>
+
+      <div className="skeleton h-10 w-32 rounded-md" />
     </div>
   );
 }
