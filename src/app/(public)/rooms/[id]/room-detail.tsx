@@ -1,4 +1,5 @@
 import type { Room } from "@/lib/data/rooms";
+import { RoomAmenities } from "@/components/room-amenities";
 import { BookNowButton } from "./book-now-button";
 
 /**
@@ -11,24 +12,29 @@ import { BookNowButton } from "./book-now-button";
 export function RoomDetail({ room }: { room: Room }) {
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+      <h1 className="text-2xl font-semibold tracking-tight text-base-content">
         {room.name}
       </h1>
       <dl className="grid grid-cols-2 gap-4 text-sm">
         <div>
-          <dt className="text-zinc-500 dark:text-zinc-400">Capacity</dt>
-          <dd className="text-base font-medium text-zinc-900 dark:text-zinc-50">
+          <dt className="text-base-content/60">Capacity</dt>
+          <dd className="text-base font-medium text-base-content">
             {room.capacity} people
           </dd>
         </div>
         <div>
-          <dt className="text-zinc-500 dark:text-zinc-400">Price</dt>
-          <dd className="text-base font-medium text-zinc-900 dark:text-zinc-50">
+          <dt className="text-base-content/60">Price</dt>
+          <dd className="text-base font-medium text-base-content">
             ${room.pricePerHour}/hour
           </dd>
         </div>
       </dl>
-      <BookNowButton roomId={room.id} />
+
+      <RoomAmenities />
+
+      <div className="flex justify-end">
+        <BookNowButton roomId={room.id} />
+      </div>
     </div>
   );
 }
