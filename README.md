@@ -134,3 +134,9 @@ Known gaps, left out of scope on purpose for this portfolio project:
   (`aria-invalid`/`aria-describedby`/`role="alert"`), but coverage isn't
   comprehensive across the app.
 - **Improve e2e test coverage** beyond the two flows tested today.
+- **Let admins upload a room image.** No `imageUrl` field on `Room`
+  yet — room cards/detail show a placeholder icon instead of a real
+  photo.
+- **Let admins define per-room amenities.** The amenity list (wifi, A/C,
+  coffee machine, etc.) shown on the room detail and "New booking" pages
+  is hardcoded and identical for every room.
